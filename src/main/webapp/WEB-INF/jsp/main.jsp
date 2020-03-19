@@ -1,5 +1,25 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+<style>
+    svg {
+      font: 10px sans-serif;
+    }
+    .line {
+      fill: none;
+      stroke: #000;
+      stroke-width: 1.5px;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+</style>
+</head>
+
 <body>
 	<!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
 	<div id="player"></div>
@@ -52,7 +72,6 @@
 		<input type='button' value='play' onclick='play()'> <input
 			type='button' value='stop' onclick='stopVideo()'>
 	</form>
-	<h3>Heart Data : ${heartData}</h3>
 	
 	<!-- graph -->	
 	<script src='https://d3js.org/d3.v3.min.js'></script>
@@ -60,20 +79,26 @@
     /**
      * 
      */
-    var n = 40,
-        random = d3.random.normal(0, .2),
-        data = d3.range(n).map(random);
-     
+    var signal = ${heartData}
+
+    var n = 100;
+    
+    var random = d3.random.normal(0, 10),
+        data = d3.range(1).map(random);
+    
+    
+    
     var margin = {top: 20, right: 20, bottom: 20, left: 40},
         width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+        height = 300 - margin.top - margin.bottom;
      
+    // set axis
     var x = d3.scale.linear()
         .domain([0, n - 1])
         .range([0, width]);
      
     var y = d3.scale.linear()
-        .domain([-1, 1])
+        .domain([0, 150])
         .range([height, 0]);
      
     var line = d3.svg.line()
@@ -107,27 +132,50 @@
         .datum(data)
         .attr("class", "line")
         .attr("d", line);
-     
+ 
     tick();
+    
+    var a = 0;
+    var f = 0;
+
      
     function tick() {
      
-      // push a new data point onto the back
-      data.push(random());
-     
+      f++;
+      if (f<100){
+    	// push a new data point onto the back
+          data.push(signal[a]);
+          a++;
+          
       // redraw the line, and slide it to the left
       path
           .attr("d", line)
           .attr("transform", null)
         .transition()
-          .duration(500)
+          .duration(50)
+          .ease("linear")
+          .attr("transform", "translate(" + x(-1) + ",0)")
+          .each("end", tick);
+     
+      }
+      else{
+    	// push a new data point onto the back
+          data.push(signal[a]);
+          a++;
+          
+      // redraw the line, and slide it to the left
+      path
+          .attr("d", line)
+          .attr("transform", null)
+        .transition()
+          .duration(50)
           .ease("linear")
           .attr("transform", "translate(" + x(-1) + ",0)")
           .each("end", tick);
      
       // pop the old data point off the front
       data.shift();
-     
+      }
     }
 
 </script>
